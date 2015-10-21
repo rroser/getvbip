@@ -10,6 +10,9 @@
 # Exit Codes:
 #     0 - Script appeared to complete successfully
 #     1 - Improper usage
+#     2 - Specified VM doesn't exist
+#     3 - VM isn't powered on
+#     4 - No active interfaces on VM
 
 EXITVAL=0
 VMINT=0
@@ -62,10 +65,36 @@ case "$1" in
         ;;
 esac
 
-# TODO: Check if VM exists
-# TODO: Check if VM is powered on
-# TODO: Check if interface exists
+# Check if VM exists
+check_vm_exists () {
+    EXITVAL=2
+    vbmout=$(VBoxManage list vms)
+    while read line
+    do
+        vm=$(echo $line | cut -d' ' -f 1 | cut -d'"' -f 2)
+        if [ "$1" = "$vm" ];
+        then
+            EXITVAL=0
+        fi
+    done <<<"$vbmout"
+    if [ $EXITVAL -eq 2 ];
+    then
+        echo Specified VM does not exist!
+        exit $EXITVAL
+    fi
+}
 
+# TODO: Check if VM is powered on
+#check_power () {
+#
+#}
+
+# TODO: Check if interface exists
+#check_int_exists () {
+#
+#}
+
+check_vm_exists $VMNAME
 VMIP=$(VBoxManage guestproperty enumerate $VMNAME | grep "Net/$VMINT/V4/IP" | cut -d',' -f 2 | cut -d' ' -f 3)
 
 echo "$VMIP"
