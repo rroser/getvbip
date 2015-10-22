@@ -17,3 +17,15 @@ Examples:
 
     RDP RemoteApp
     xfreerdp --app --plugin rails --data "||shared_program" -- `getvbip VM_Name`
+
+Usage:
+
+    Usage: getvbip [-i interface_number] virtualbox_vm_name
+
+TODO:
+
+    Check if VM is powered on
+
+    Check if selected interface exists
+
+    Select interface based on what networks are active on the Host OS
