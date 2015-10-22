@@ -79,15 +79,29 @@ check_vm_exists () {
     done <<<"$vbmout"
     if [ $EXITVAL -eq 2 ];
     then
-        echo Specified VM does not exist!
+        echo "Specified VM does not exist!"
         exit $EXITVAL
     fi
 }
 
 # TODO: Check if VM is powered on
-#check_power () {
-#
-#}
+check_power () {
+    EXITVAL=3
+    vbmout=$(VBoxManage list runningvms)
+    while read line
+    do
+        vm=$(echo $line | cut -d' ' -f 1 | cut -d'"' -f 2)
+        if [ "$1" = "$vm" ];
+        then
+            EXITVAL=0
+        fi
+    done <<<"$vbmout"
+    if [ $EXITVAL -eq 3 ];
+    then
+        echo "Specified VM is not currently running!"
+        exit $EXITVAL
+    fi
+}
 
 # TODO: Check if interface exists
 #check_int_exists () {
@@ -95,6 +109,7 @@ check_vm_exists () {
 #}
 
 check_vm_exists $VMNAME
+check_power $VMNAME
 VMIP=$(VBoxManage guestproperty get $VMNAME "/VirtualBox/GuestInfo/Net/$VMINT/V4/IP" | cut -d' ' -f 2)
 
 echo "$VMIP"
