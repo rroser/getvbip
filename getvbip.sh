@@ -5,7 +5,7 @@
 #
 # Usage: getvbip [-i interface_number] virtualbox_vm_name
 #
-# Returns: 32 bit IPv4 address
+# Output: 32 bit IPv4 address
 #
 # Exit Codes:
 #     0 - Script appeared to complete successfully
@@ -20,7 +20,7 @@ VMIP=
 VMNAME=
 
 # Returns script usage info and exits
-return_usage () {
+output_usage () {
     echo "Usage: $0 [-i interface_number] virtualbox_vm_name"
     EXITVAL=1
     exit $EXITVAL
@@ -28,30 +28,30 @@ return_usage () {
 
 # Check if interface value is integer, otherwise exit
 # Usage: check_int somevalue
-check_int () {
+check_integer () {
     if ! [ "$1" -eq "$1" ] 2> /dev/null
     then
         echo "Interface option only accepts integers!"
-        return_usage
+        output_usage
     fi
 }
 
 # Option handling
 case "$1" in
     "")
-        return_usage
+        output_usage
         ;;
     -i)
         case "$2" in
             "")
-                return_usage
+                output_usage
                 ;;
             *)
-                check_int $2
+                check_integer $2
                 VMINT=$2
                 case "$3" in
                     "")
-                        return_usage
+                        output_usage
                         ;;
                     *)
                         VMNAME=$3
@@ -84,7 +84,7 @@ check_vm_exists () {
     fi
 }
 
-# TODO: Check if VM is powered on
+# Check if VM is powered on
 check_power () {
     EXITVAL=3
     vbmout=$(VBoxManage list runningvms)
@@ -103,13 +103,28 @@ check_power () {
     fi
 }
 
-# TODO: Check if interface exists
-#check_int_exists () {
-#
-#}
+# Check if interface exists and is up
+check_interface () {
+    vbmout=$(VBoxManage guestproperty enumerate $VMNAME | grep "/Net/$1/Status")
+    if [ -z "$vbmout" ];
+    then
+        echo "Interface does not exists!"
+        EXITVAL=4
+        exit $EXITVAL
+    else
+        intstat=$(echo $vbmout | cut -d',' -f 2 | cut -d' ' -f 3)
+        if ! [ "$intstat" = "Up" ];
+        then
+            echo "Interface is down!"
+            EXITVAL=4
+            exit $EXITVAL
+        fi
+    fi
+}
 
 check_vm_exists $VMNAME
 check_power $VMNAME
+check_interface $VMINT
 VMIP=$(VBoxManage guestproperty get $VMNAME "/VirtualBox/GuestInfo/Net/$VMINT/V4/IP" | cut -d' ' -f 2)
 
 echo "$VMIP"

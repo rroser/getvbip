@@ -24,8 +24,6 @@ Usage:
 
 TODO:
 
-    Check if VM is powered on
-
-    Check if selected interface exists
-
     Select interface based on what networks are active on the Host OS
+
+    Create install script to add to system binary directory
