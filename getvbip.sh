@@ -95,7 +95,7 @@ check_vm_exists () {
 #}
 
 check_vm_exists $VMNAME
-VMIP=$(VBoxManage guestproperty enumerate $VMNAME | grep "Net/$VMINT/V4/IP" | cut -d',' -f 2 | cut -d' ' -f 3)
+VMIP=$(VBoxManage guestproperty get $VMNAME "/VirtualBox/GuestInfo/Net/$VMINT/V4/IP" | cut -d' ' -f 2)
 
 echo "$VMIP"
            
