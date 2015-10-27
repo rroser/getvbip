@@ -21,7 +21,7 @@ VMNAME=
 
 # Returns script usage info and exits
 output_usage () {
-    echo "Usage: $0 [-i interface_number] virtualbox_vm_name"
+    echo "Usage: $0 [-i interface_number] virtualbox_vm_name" 1>&2
     EXITVAL=1
     exit $EXITVAL
 }
@@ -31,7 +31,7 @@ output_usage () {
 check_integer () {
     if ! [ "$1" -eq "$1" ] 2> /dev/null
     then
-        echo "Interface option only accepts integers!"
+        echo "Interface option only accepts integers!" 1>&2
         output_usage
     fi
 }
@@ -79,7 +79,7 @@ check_vm_exists () {
     done <<<"$vbmout"
     if [ $EXITVAL -eq 2 ];
     then
-        echo "Specified VM does not exist!"
+        echo "Specified VM does not exist!" 1>&2
         exit $EXITVAL
     fi
 }
@@ -98,7 +98,7 @@ check_power () {
     done <<<"$vbmout"
     if [ $EXITVAL -eq 3 ];
     then
-        echo "Specified VM is not currently running!"
+        echo "Specified VM is not currently running!" 1>&2
         exit $EXITVAL
     fi
 }
@@ -108,14 +108,14 @@ check_interface () {
     vbmout=$(VBoxManage guestproperty enumerate $VMNAME | grep "/Net/$1/Status")
     if [ -z "$vbmout" ];
     then
-        echo "Interface does not exists!"
+        echo "Interface does not exists!" 1>&2
         EXITVAL=4
         exit $EXITVAL
     else
         intstat=$(echo $vbmout | cut -d',' -f 2 | cut -d' ' -f 3)
         if ! [ "$intstat" = "Up" ];
         then
-            echo "Interface is down!"
+            echo "Interface is down!" 1>&2
             EXITVAL=4
             exit $EXITVAL
         fi
